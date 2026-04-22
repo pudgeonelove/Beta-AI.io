@@ -5,122 +5,121 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Beta AI</title>
     <style>
-        :root { 
-            --bg: #0f0f0f; 
-            --chat-bg: #1a1a1a; 
-            --accent: #4da6ff; 
-            --text: #ffffff; 
-            --input-height: 70px;
+        :root {
+            --bg: #0f0f0f;
+            --chat-bg: #1a1a1a;
+            --accent: #4da6ff;
+            --text: #ffffff;
         }
-        
+
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, system-ui, sans-serif; }
-        
-        body { 
-            background: var(--bg); 
-            color: var(--text); 
-            height: 100vh;
-            width: 100vw;
+
+        /* Используем dvh для идеального отображения на мобилках */
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            height: 100dvh;
             display: flex;
             flex-direction: column;
+            overflow: hidden;
         }
 
         /* Шапка */
-        .header { 
-            padding: 15px 20px; 
-            background: var(--bg); 
+        .header {
+            padding: env(safe-area-inset-top, 10px) 20px 10px;
+            background: var(--bg);
             border-bottom: 1px solid #333;
-            position: fixed;
-            top: 0;
-            width: 100%;
-            z-index: 100;
+            flex-shrink: 0;
         }
 
         .logo { font-size: 20px; font-weight: 800; color: var(--accent); }
 
-        /* Область сообщений */
-        #messages { 
+        /* Область чата */
+        #messages {
             flex: 1;
             overflow-y: auto;
-            padding: 80px 15px 100px 15px; /* Отступы для шапки и поля ввода */
+            padding: 15px;
             display: flex;
             flex-direction: column;
             gap: 12px;
             background: var(--chat-bg);
+            /* Плавная прокрутка для iOS */
             -webkit-overflow-scrolling: touch;
         }
 
-        .msg { 
-            max-width: 85%; 
-            padding: 10px 14px; 
-            border-radius: 18px; 
-            font-size: 16px; 
-            line-height: 1.4; 
-            word-wrap: break-word; 
+        .msg {
+            max-width: 85%;
+            padding: 10px 14px;
+            border-radius: 18px;
+            font-size: 16px;
+            line-height: 1.4;
+            word-wrap: break-word;
         }
 
         .user { align-self: flex-end; background: var(--accent); border-bottom-right-radius: 4px; }
         .ai { align-self: flex-start; background: #333; border-bottom-left-radius: 4px; }
         .error-msg { background: #4a1a1a !important; color: #ff8888 !important; border: 1px solid #ff4444; }
 
-        /* ФИКСИРОВАННОЕ ПОЛЕ ВВОДА */
-        .input-container { 
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            padding: 10px 15px calc(15px + env(safe-area-inset-bottom, 0px)); 
-            display: flex; 
-            gap: 10px; 
-            background: #111; 
+        /* Панель ввода - теперь она всегда в потоке внизу */
+        .input-container {
+            flex-shrink: 0;
+            background: #111;
             border-top: 1px solid #333;
-            z-index: 1000;
+            padding: 10px 15px calc(15px + env(safe-area-inset-bottom, 0px));
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
-        input { 
-            flex: 1; 
-            background: #252525; 
-            border: 1px solid #444; 
-            color: white; 
-            padding: 12px 18px; 
-            border-radius: 25px; 
-            outline: none; 
-            font-size: 16px; 
+        input {
+            flex: 1;
+            background: #252525;
+            border: 1px solid #444;
+            color: white;
+            padding: 12px 18px;
+            border-radius: 25px;
+            outline: none;
+            font-size: 16px; /* Чтобы не зумило на iPhone */
         }
 
-        button { 
-            background: var(--accent); 
-            border: none; 
-            width: 46px; 
-            height: 46px; 
-            border-radius: 50%; 
-            cursor: pointer; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
+        button {
+            background: var(--accent);
+            border: none;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             flex-shrink: 0;
         }
 
-        svg { fill: white; width: 22px; height: 22px; }
+        svg { fill: white; width: 20px; height: 20px; }
 
-        /* Для больших экранов ограничим ширину */
+        /* Центрируем на ПК */
         @media (min-width: 768px) {
-            #messages, .input-container, .header {
-                max-width: 600px;
+            .header, #messages, .input-container {
+                max-width: 700px;
                 margin: 0 auto;
-                left: 0; right: 0;
+                width: 100%;
             }
+            #messages { border-left: 1px solid #333; border-right: 1px solid #333; }
         }
     </style>
 </head>
 <body>
-    <div class="header"><div class="logo">Beta AI</div></div>
-    
+
+    <div class="header">
+        <div class="logo">Beta AI</div>
+    </div>
+
     <div id="messages">
-        <div class="msg ai">Привет, чем могу помочь?</div>
+        <div class="msg ai">Вернул версию API <b>v1beta</b>. Поле ввода должно быть прямо под этим чатом. Пробуем?</div>
     </div>
 
     <div class="input-container">
-        <input type="text" id="userInput" placeholder="Напиши сообщение..." autocomplete="off">
+        <input type="text" id="userInput" placeholder="Сообщение..." autocomplete="off">
         <button id="sendBtn">
             <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg>
         </button>
@@ -128,7 +127,8 @@
 
     <script>
         const KEY = 'AIzaSyAbNi8nRsoRdno0wiYTXaFNxsL6ZL-7oYk';
-        const URL = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${KEY}`;
+        // ИСПРАВЛЕНО: Возвращена версия v1beta
+        const URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${KEY}`;
 
         const messagesDiv = document.getElementById('messages');
         const input = document.getElementById('userInput');
@@ -139,7 +139,7 @@
             div.className = `msg ${type} ${isError ? 'error-msg' : ''}`;
             div.innerHTML = text.replace(/</g, "&lt;").replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
             messagesDiv.appendChild(div);
-            messagesDiv.scrollTo({ top: messagesDiv.scrollHeight, behavior: 'smooth' });
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
             return div;
         }
 
@@ -161,19 +161,19 @@
                 const data = await res.json();
 
                 if (!res.ok) {
-                    const msg = data.error ? data.error.message : 'Неизвестная ошибка';
+                    const msg = data.error ? data.error.message : 'Ошибка API';
                     aiMsg.classList.add('error-msg');
-                    aiMsg.innerHTML = `<b>Ошибка API:</b><br>${msg}<br><br>Попробуй сменить регион в VPN.`;
+                    aiMsg.innerHTML = `<b>Ошибка:</b><br>${msg}`;
                     return;
                 }
 
                 if (data.candidates && data.candidates[0].content) {
-                    const text = data.candidates[0].content.parts[0].text;
-                    aiMsg.innerHTML = text.replace(/</g, "&lt;").replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+                    const reply = data.candidates[0].content.parts[0].text;
+                    aiMsg.innerHTML = reply.replace(/</g, "&lt;").replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
                 }
             } catch (e) {
                 aiMsg.classList.add('error-msg');
-                aiMsg.innerHTML = `<b>Ошибка сети:</b><br>${e.message}<br><br>Проверь VPN (нужен регион США или Европа).`;
+                aiMsg.innerHTML = `<b>Ошибка сети:</b><br>${e.message}<br><br>Проверь VPN (нужен регион США/Европа).`;
             }
         }
 
