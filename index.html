@@ -3,145 +3,126 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Beta AI Chat</title>
+    <title>Beta AI</title>
     <style>
         :root {
-            --bg-color: #121212;
-            --chat-bg: #1e1e1e;
-            --accent-color: #4da6ff;
-            --text-color: #ffffff;
-            --input-bg: #2d2d2d;
+            --bg: #0f0f0f;
+            --chat-bg: #1a1a1a;
+            --accent: #4da6ff;
+            --text: #ffffff;
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: 'Segoe UI', Roboto, sans-serif;
             -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
+            background-color: var(--bg);
+            color: var(--text);
             height: 100vh;
-            /* Исправление для мобильных браузеров */
-            height: -webkit-fill-available; 
             display: flex;
             flex-direction: column;
             overflow: hidden;
         }
 
-        html {
-            height: -webkit-fill-available;
-        }
-
         /* Название в углу */
-        .header {
-            padding: 15px 20px;
-            background: var(--bg-color);
-            z-index: 10;
-        }
-
         .logo {
-            font-size: 20px;
-            font-weight: bold;
-            color: var(--accent-color);
-            letter-spacing: 1px;
+            padding: 15px 20px;
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--accent);
+            background: var(--bg);
         }
 
-        /* Чат */
-        .chat-container {
+        /* Контейнер чата */
+        #chat-container {
             flex: 1;
+            display: flex;
+            flex-direction: column;
             width: 100%;
-            max-width: 800px;
+            max-width: 700px;
             margin: 0 auto;
-            background-color: var(--chat-bg);
-            display: flex;
-            flex-direction: column;
-            position: relative;
-            /* Скругление только на больших экранах */
-            border-radius: 15px 15px 0 0; 
+            background: var(--chat-bg);
+            border-top: 1px solid #333;
         }
 
-        .chat-messages {
+        #messages {
             flex: 1;
-            padding: 15px;
             overflow-y: auto;
+            padding: 20px;
             display: flex;
             flex-direction: column;
-            gap: 12px;
-            padding-bottom: 30px;
+            gap: 15px;
         }
 
-        .message {
+        .msg {
             max-width: 85%;
             padding: 12px 16px;
-            border-radius: 18px;
-            line-height: 1.4;
+            border-radius: 15px;
+            line-height: 1.5;
+            font-size: 16px;
             word-wrap: break-word;
-            font-size: 16px; /* Оптимально для телефона */
         }
 
-        .user-msg {
-            background-color: var(--accent-color);
-            color: #fff;
+        .user {
             align-self: flex-end;
-            border-bottom-right-radius: 4px;
+            background: var(--accent);
+            color: white;
+            border-bottom-right-radius: 2px;
         }
 
-        .ai-msg {
-            background-color: #333;
-            color: #e0e0e0;
+        .ai {
             align-self: flex-start;
-            border-bottom-left-radius: 4px;
+            background: #333;
+            color: #eee;
+            border-bottom-left-radius: 2px;
         }
 
         /* Поле ввода */
-        .chat-input-area {
+        .input-area {
+            padding: 15px;
             display: flex;
-            padding: 12px 15px;
-            background-color: #1a1a1a;
-            border-top: 1px solid #333;
             gap: 10px;
-            padding-bottom: calc(12px + env(safe-area-inset-bottom)); /* Для iPhone с челкой */
+            background: #111;
+            border-top: 1px solid #333;
+            padding-bottom: env(safe-area-inset-bottom, 15px);
         }
 
-        input[type="text"] {
+        input {
             flex: 1;
-            padding: 14px;
+            background: #252525;
             border: 1px solid #444;
-            background-color: var(--input-bg);
-            color: #fff;
+            color: white;
+            padding: 12px 18px;
             border-radius: 25px;
             outline: none;
-            font-size: 16px; /* Предотвращает зум на iPhone */
+            font-size: 16px; /* Важно для мобилок чтобы не зумило */
         }
 
         button {
-            width: 50px;
-            height: 50px;
-            background-color: var(--accent-color);
-            color: #fff;
+            background: var(--accent);
             border: none;
+            width: 45px;
+            height: 45px;
             border-radius: 50%;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            flex-shrink: 0;
-            transition: transform 0.1s;
+            transition: 0.2s;
         }
 
-        button:active {
-            transform: scale(0.9);
-        }
+        button:active { transform: scale(0.9); }
 
-        /* Адаптация под десктоп */
+        svg { fill: white; width: 20px; height: 20px; }
+
         @media (min-width: 768px) {
-            .chat-container {
-                margin: 20px auto;
-                height: 85vh;
+            #chat-container {
+                margin-bottom: 20px;
                 border-radius: 15px;
                 border: 1px solid #333;
             }
@@ -150,99 +131,75 @@
 </head>
 <body>
 
-    <div class="header">
-        <div class="logo">Beta AI</div>
-    </div>
+    <div class="logo">Beta AI</div>
 
-    <div class="chat-container">
-        <div class="chat-messages" id="chat-messages">
-            <div class="message ai-msg">Привет! Я готов к работе. О чем пообщаемся?</div>
+    <div id="chat-container">
+        <div id="messages">
+            <div class="msg ai">Привет! Я Beta AI. Готов общаться.</div>
         </div>
-        <div class="chat-input-area">
-            <input type="text" id="user-input" placeholder="Сообщение..." autocomplete="off">
-            <button onclick="sendMessage()">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+        <div class="input-area">
+            <input type="text" id="userInput" placeholder="Напиши что-нибудь..." autocomplete="off">
+            <button id="sendBtn">
+                <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg>
             </button>
         </div>
     </div>
 
     <script>
-        // ВСТАВЬ СВОЙ КЛЮЧ СЮДА
-        const API_KEY = 'AIzaSyAbNi8nRsoRdno0wiYTXaFNxsL6ZL-7oYk'; 
+        // Твой API ключ успешно интегрирован
+        const KEY = 'AIzaSyAbNi8nRsoRdno0wiYTXaFNxsL6ZL-7oYk';
+        const URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${KEY}`;
 
-        const chatMessages = document.getElementById('chat-messages');
-        const userInput = document.getElementById('user-input');
+        const messagesDiv = document.getElementById('messages');
+        const input = document.getElementById('userInput');
+        const btn = document.getElementById('sendBtn');
 
-        // Обработка нажатия Enter
-        userInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') sendMessage();
-        });
-
-        function appendMessage(text, className) {
-            const msgDiv = document.createElement('div');
-            msgDiv.className = `message ${className}`;
-            
-            // Обработка простого форматирования (жирный шрифт и ссылки)
-            let formattedText = text
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>') // Жирный текст **текст**
-                .replace(/\n/g, "<br>");
-
-            msgDiv.innerHTML = formattedText;
-            chatMessages.appendChild(msgDiv);
-            chatMessages.scrollTo({ top: chatMessages.scrollHeight, behavior: 'smooth' });
-            return msgDiv;
+        function addMessage(text, type) {
+            const div = document.createElement('div');
+            div.className = `msg ${type}`;
+            div.innerHTML = text.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+            messagesDiv.appendChild(div);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            return div;
         }
 
-        async function sendMessage() {
-            const text = userInput.value.trim();
-            if (!text || !API_KEY || API_KEY === 'AIzaSyAbNi8nRsoRdno0wiYTXaFNxsL6ZL-7oYk') {
-                if (API_KEY.includes('ТВОЙ')) alert('Пожалуйста, вставьте API ключ в код!');
-                return;
-            }
+        async function main() {
+            const val = input.value.trim();
+            if (!val) return;
 
-            appendMessage(text, 'user-msg');
-            userInput.value = '';
-            
-            const aiMsgElement = appendMessage('...', 'ai-msg');
+            addMessage(val, 'user');
+            input.value = '';
+
+            const aiMsg = addMessage('...', 'ai');
 
             try {
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
+                const res = await fetch(URL, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: text }] }]
-                    })
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ contents: [{ parts: [{ text: val }] }] })
                 });
 
-                const data = await response.json();
+                const data = await res.json();
 
-                if (!response.ok) {
-                    throw new Error(data.error ? data.error.message : 'Ошибка сервера');
-                }
-
-                // Исправлена ошибка: проверяем, есть ли ответ (иногда ИИ блокирует текст)
                 if (data.candidates && data.candidates[0].content) {
-                    const aiResponseText = data.candidates[0].content.parts[0].text;
-                    aiMsgElement.innerHTML = ''; // Очищаем точки
-                    
-                    // Выводим текст с форматированием
-                    let finalHtml = aiResponseText
-                        .replace(/</g, "&lt;")
-                        .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
-                        .replace(/\n/g, "<br>");
-                    
-                    aiMsgElement.innerHTML = finalHtml;
+                    aiMsg.innerHTML = data.candidates[0].content.parts[0].text
+                        .replace(/\n/g, '<br>')
+                        .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
                 } else {
-                    aiMsgElement.innerHTML = "<i>ИИ не смог сформировать ответ (возможно, запрос отклонен системой безопасности).</i>";
+                    aiMsg.innerText = "Ошибка: ИИ не ответил. Попробуй включить VPN.";
                 }
-                
-            } catch (error) {
-                console.error(error);
-                aiMsgElement.innerHTML = `Ошибка: ${error.message}. Попробуйте включить VPN или проверить ключ.`;
+            } catch (e) {
+                aiMsg.innerText = "Ошибка соединения. Проверь интернет или VPN.";
             }
         }
+
+        // Клик по кнопке
+        btn.addEventListener('click', main);
+
+        // Нажатие Enter
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') main();
+        });
     </script>
 </body>
 </html>
