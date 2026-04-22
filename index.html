@@ -3,23 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Beta AI Final Fix</title>
+    <title>Beta AI Final</title>
     <style>
         :root { --bg: #0f0f0f; --chat-bg: #1a1a1a; --accent: #4da6ff; --text: #ffffff; }
-        html, body { height: 100dvh; width: 100%; margin: 0; padding: 0; background: var(--bg); color: var(--text); overflow: hidden; }
+        
+        /* Жесткая привязка к высоте экрана */
+        html, body { height: 100%; width: 100%; margin: 0; padding: 0; background: var(--bg); color: var(--text); overflow: hidden; }
+        
         body { display: flex; flex-direction: column; font-family: -apple-system, system-ui, sans-serif; }
-        .header { padding: 15px 20px; border-bottom: 1px solid #333; flex-shrink: 0; }
+
+        .header { padding: 15px 20px; border-bottom: 1px solid #333; flex-shrink: 0; background: var(--bg); }
         .logo { font-size: 20px; font-weight: 800; color: var(--accent); }
-        #messages { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 12px; background: var(--chat-bg); -webkit-overflow-scrolling: touch; }
+
+        /* Чат */
+        #messages { 
+            flex-grow: 1; 
+            overflow-y: auto; 
+            padding: 15px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 12px; 
+            background: var(--chat-bg);
+            -webkit-overflow-scrolling: touch;
+        }
+
         .msg { max-width: 85%; padding: 10px 14px; border-radius: 18px; font-size: 16px; line-height: 1.4; word-wrap: break-word; }
         .user { align-self: flex-end; background: var(--accent); border-bottom-right-radius: 4px; }
         .ai { align-self: flex-start; background: #333; border-bottom-left-radius: 4px; }
-        .error { background: #4a1a1a !important; color: #ff8888 !important; border: 1px solid #ff4444; font-size: 14px; padding: 15px; }
-        .input-container { flex-shrink: 0; padding: 10px 15px calc(15px + env(safe-area-inset-bottom, 0px)); background: #111; border-top: 1px solid #333; display: flex; gap: 10px; align-items: center; }
-        input { flex: 1; background: #252525; border: 1px solid #444; color: white; padding: 12px 18px; border-radius: 25px; outline: none; font-size: 16px; }
-        button { background: var(--accent); border: none; width: 44px; height: 44px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .error { background: #4a1a1a !important; color: #ff8888 !important; border: 1px solid #ff4444; font-size: 14px; padding: 10px; border-radius: 10px; }
+
+        /* Поле ввода всегда внизу экрана */
+        .input-container { 
+            flex-shrink: 0; 
+            padding: 10px 15px calc(15px + env(safe-area-inset-bottom, 0px)); 
+            background: #111; 
+            border-top: 1px solid #333; 
+            display: flex; 
+            gap: 10px;
+            align-items: center;
+        }
+
+        input { 
+            flex: 1; background: #252525; border: 1px solid #444; color: white; 
+            padding: 12px 18px; border-radius: 25px; outline: none; font-size: 16px; 
+        }
+
+        button { 
+            background: var(--accent); border: none; width: 44px; height: 44px; 
+            border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+        }
+
         svg { fill: white; width: 20px; height: 20px; }
-        @media (min-width: 768px) { .header, #messages, .input-container { max-width: 650px; margin: 0 auto; width: 100%; } }
+
+        @media (min-width: 768px) {
+            .header, #messages, .input-container { max-width: 600px; margin: 0 auto; width: 100%; }
+        }
     </style>
 </head>
 <body>
@@ -27,7 +65,7 @@
     <div class="header"><div class="logo">Beta AI</div></div>
     
     <div id="messages">
-        <div class="msg ai">Попробуем еще раз. Если снова будет ошибка, попробуй в VPN сменить страну на <b>США (USA)</b> — это важно для работы этой модели.</div>
+        <div class="msg ai">Я изменил модель на <b>gemini-pro</b>. Это должно решить ошибку 404. Поле ввода на месте?</div>
     </div>
 
     <div class="input-container">
@@ -39,8 +77,8 @@
 
     <script>
         const KEY = 'AIzaSyAbNi8nRsoRdno0wiYTXaFNxsL6ZL-7oYk';
-        // Пробуем максимально точный путь к модели
-        const URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${KEY}`;
+        // Пробуем модель gemini-pro — она самая стабильная
+        const URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${KEY}`;
 
         const messagesDiv = document.getElementById('messages');
         const input = document.getElementById('userInput');
@@ -76,8 +114,7 @@
 
                 if (!res.ok) {
                     aiMsg.classList.add('error');
-                    // Выводим статус и сообщение для четкого понимания
-                    aiMsg.innerHTML = `<b>Ошибка API:</b><br>${data.error ? data.error.message : 'Неизвестная ошибка'}<br><br><i>Код: ${res.status}</i>`;
+                    aiMsg.innerHTML = `<b>Ошибка:</b> ${data.error ? data.error.message : 'Не удалось найти модель'}. <br>Попробуй сменить регион VPN на США.`;
                     return;
                 }
 
@@ -87,7 +124,7 @@
                 }
             } catch (e) {
                 aiMsg.classList.add('error');
-                aiMsg.innerHTML = `<b>Ошибка сети:</b><br>${e.message}<br><br>Проверь, работает ли VPN в режиме "для всего устройства".`;
+                aiMsg.innerHTML = `<b>Ошибка сети:</b> ${e.message}`;
             }
         }
 
