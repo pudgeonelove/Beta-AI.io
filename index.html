@@ -148,7 +148,7 @@
     <script>
         // ВАЖНО: Для полноценной работы ИИ получи бесплатный ключ на https://aistudio.google.com/
         // и вставь его вместо текста 'ТВОЙ_API_КЛЮЧ_ЗДЕСЬ'
-        const API_KEY = 'AIzaSyCfbwGnOoz9qyz4RxLG70QinN8jkUTf0_4'; 
+        const API_KEY = 'AIzaSyAbNi8nRsoRdno0wiYTXaFNxsL6ZL-7oYk'; 
 
         const chatMessages = document.getElementById('chat-messages');
         const userInput = document.getElementById('user-input');
@@ -181,7 +181,7 @@
             const aiMsgElement = appendMessage('Печатает...', 'ai-msg');
 
             // Заглушка, если API ключ не добавлен
-            if (API_KEY === 'AIzaSyCfbwGnOoz9qyz4RxLG70QinN8jkUTf0_4') {
+            if (API_KEY === 'AIzaSyAbNi8nRsoRdno0wiYTXaFNxsL6ZL-7oYk') {
                 setTimeout(() => {
                     aiMsgElement.innerHTML = 'Я пока работаю в тестовом режиме. Чтобы я мог искать информацию и отвечать на любые вопросы, добавьте API-ключ Gemini в код сайта.';
                 }, 1000);
