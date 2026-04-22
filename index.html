@@ -3,61 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Beta AI Final</title>
+    <title>Beta AI Final Fix</title>
     <style>
         :root { --bg: #0f0f0f; --chat-bg: #1a1a1a; --accent: #4da6ff; --text: #ffffff; }
-        
-        /* Умная высота для мобилок, чтобы поле ввода не исчезало */
         html, body { height: 100dvh; width: 100%; margin: 0; padding: 0; background: var(--bg); color: var(--text); overflow: hidden; }
-        
         body { display: flex; flex-direction: column; font-family: -apple-system, system-ui, sans-serif; }
-
         .header { padding: 15px 20px; border-bottom: 1px solid #333; flex-shrink: 0; }
         .logo { font-size: 20px; font-weight: 800; color: var(--accent); }
-
-        /* Чат занимает всё место, кроме шапки и подвала */
-        #messages { 
-            flex-grow: 1; 
-            overflow-y: auto; 
-            padding: 15px; 
-            display: flex; 
-            flex-direction: column; 
-            gap: 12px; 
-            background: var(--chat-bg);
-            -webkit-overflow-scrolling: touch;
-        }
-
+        #messages { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 12px; background: var(--chat-bg); -webkit-overflow-scrolling: touch; }
         .msg { max-width: 85%; padding: 10px 14px; border-radius: 18px; font-size: 16px; line-height: 1.4; word-wrap: break-word; }
         .user { align-self: flex-end; background: var(--accent); border-bottom-right-radius: 4px; }
         .ai { align-self: flex-start; background: #333; border-bottom-left-radius: 4px; }
-        .error { background: #4a1a1a !important; color: #ff8888 !important; border: 1px solid #ff4444; font-size: 14px; }
-
-        /* Поле ввода всегда прижато к низу */
-        .input-container { 
-            flex-shrink: 0; 
-            padding: 10px 15px calc(15px + env(safe-area-inset-bottom, 0px)); 
-            background: #111; 
-            border-top: 1px solid #333; 
-            display: flex; 
-            gap: 10px;
-            align-items: center;
-        }
-
-        input { 
-            flex: 1; background: #252525; border: 1px solid #444; color: white; 
-            padding: 12px 18px; border-radius: 25px; outline: none; font-size: 16px; 
-        }
-
-        button { 
-            background: var(--accent); border: none; width: 44px; height: 44px; 
-            border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-        }
-
+        .error { background: #4a1a1a !important; color: #ff8888 !important; border: 1px solid #ff4444; font-size: 14px; padding: 15px; }
+        .input-container { flex-shrink: 0; padding: 10px 15px calc(15px + env(safe-area-inset-bottom, 0px)); background: #111; border-top: 1px solid #333; display: flex; gap: 10px; align-items: center; }
+        input { flex: 1; background: #252525; border: 1px solid #444; color: white; padding: 12px 18px; border-radius: 25px; outline: none; font-size: 16px; }
+        button { background: var(--accent); border: none; width: 44px; height: 44px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
         svg { fill: white; width: 20px; height: 20px; }
-
-        @media (min-width: 768px) {
-            .header, #messages, .input-container { max-width: 650px; margin: 0 auto; width: 100%; }
-        }
+        @media (min-width: 768px) { .header, #messages, .input-container { max-width: 650px; margin: 0 auto; width: 100%; } }
     </style>
 </head>
 <body>
@@ -65,11 +27,11 @@
     <div class="header"><div class="logo">Beta AI</div></div>
     
     <div id="messages">
-        <div class="msg ai">Я обновил модель на <b>gemini-1.5-flash-latest</b>. Поле ввода теперь должно быть внизу. Пробуем еще раз?</div>
+        <div class="msg ai">Попробуем еще раз. Если снова будет ошибка, попробуй в VPN сменить страну на <b>США (USA)</b> — это важно для работы этой модели.</div>
     </div>
 
     <div class="input-container">
-        <input type="text" id="userInput" placeholder="Сообщение..." autocomplete="off">
+        <input type="text" id="userInput" placeholder="Напиши что-нибудь..." autocomplete="off">
         <button id="sendBtn">
             <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg>
         </button>
@@ -77,8 +39,8 @@
 
     <script>
         const KEY = 'AIzaSyAbNi8nRsoRdno0wiYTXaFNxsL6ZL-7oYk';
-        // Пробуем альтернативный URL с суффиксом -latest
-        const URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${KEY}`;
+        // Пробуем максимально точный путь к модели
+        const URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${KEY}`;
 
         const messagesDiv = document.getElementById('messages');
         const input = document.getElementById('userInput');
@@ -104,15 +66,18 @@
             try {
                 const res = await fetch(URL, {
                     method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ contents: [{ parts: [{ text: val }] }] })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: val }] }]
+                    })
                 });
 
                 const data = await res.json();
 
                 if (!res.ok) {
                     aiMsg.classList.add('error');
-                    aiMsg.innerHTML = `<b>Техническая ошибка:</b><br>${data.error ? data.error.message : 'Неизвестно'}<br><br><i>Совет: Если ты в Кыргызстане, убедись, что VPN включен и в нем выбрана страна США или Германия.</i>`;
+                    // Выводим статус и сообщение для четкого понимания
+                    aiMsg.innerHTML = `<b>Ошибка API:</b><br>${data.error ? data.error.message : 'Неизвестная ошибка'}<br><br><i>Код: ${res.status}</i>`;
                     return;
                 }
 
@@ -122,7 +87,7 @@
                 }
             } catch (e) {
                 aiMsg.classList.add('error');
-                aiMsg.innerHTML = `<b>Ошибка сети:</b><br>${e.message}. Попробуй сменить сервер в VPN.`;
+                aiMsg.innerHTML = `<b>Ошибка сети:</b><br>${e.message}<br><br>Проверь, работает ли VPN в режиме "для всего устройства".`;
             }
         }
 
