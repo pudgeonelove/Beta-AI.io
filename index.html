@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Beta AI</title>
+    <title>Beta AI 0.1.2</title>
     <style>
         :root { --bg: #131314; --panel: #1e1f20; --text: #e3e3e3; --accent: #8ab4f8; --user-msg: #2b2c2f; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, sans-serif; }
@@ -18,7 +18,7 @@
         .ai-wrapper { align-self: flex-start; display: flex; gap: 12px; width: 100%; }
         .ai-avatar { width: 32px; height: 32px; background: #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 14px; }
         .ai-bubble { flex: 1; padding-top: 4px; }
-        .ai-img { width: 100%; max-width: 300px; border-radius: 12px; margin-top: 10px; display: block; border: 1px solid #444; }
+        .ai-img { width: 100%; max-width: 350px; border-radius: 12px; margin-top: 12px; display: block; border: 1px solid #444; background: #222; }
         .input-container { padding: 10px 15px calc(15px + env(safe-area-inset-bottom, 0px)); background: var(--bg); flex-shrink: 0; }
         .input-bar { background: var(--panel); border-radius: 28px; display: flex; align-items: flex-end; padding: 8px 12px 8px 20px; }
         textarea { flex: 1; background: transparent; border: none; color: white; outline: none; resize: none; font-size: 16px; max-height: 150px; padding: 10px 0; }
@@ -33,7 +33,7 @@
     </style>
 </head>
 <body>
-    <header><div class="logo-icon"></div><h1>Beta AI 0.1.0</h1></header>
+    <header><div class="logo-icon"></div><h1>Beta AI 0.1.2</h1></header>
     <div id="chat">
         <div class="ai-wrapper">
             <div class="ai-avatar">✨</div>
@@ -61,21 +61,12 @@
             btn.classList.toggle('active', prompt.value.trim().length > 0);
         });
 
-        async function fetchImage(query) {
-            try {
-                const res = await fetch(`https://source.unsplash.com/featured/?${encodeURIComponent(query)}`);
-                if (res.ok) return res.url;
-            } catch (e) { return null; }
-            return null;
-        }
-
         async function addMessage(role, text) {
             const wrapper = document.createElement('div');
             wrapper.className = role === 'user' ? 'user-wrapper bubble' : 'ai-wrapper bubble';
             
-            // Поиск тега [IMG: ...]
-            let imageTag = text.match(/\[IMG: (.*?)\]/);
-            let cleanText = text.replace(/\[IMG: .*?\]/g, '').trim();
+            let imageTag = text.match(/\[IMG: (.*?)\]/i);
+            let cleanText = text.replace(/\[IMG: .*?\]/gi, '').trim();
             
             const formatted = cleanText.replace(/</g, "&lt;").replace(/\*\*(.*?)\*\*/g, '<b>$1</b>').replace(/\n/g, '<br>');
             
@@ -83,14 +74,13 @@
                 wrapper.innerHTML = `<div class="user-bubble">${formatted}</div>`;
             } else {
                 wrapper.innerHTML = `<div class="ai-avatar">✨</div><div class="ai-bubble">${formatted}</div>`;
-                if (imageTag) {
-                    const imgUrl = await fetchImage(imageTag[1]);
-                    if (imgUrl) {
-                        const imgElement = document.createElement('img');
-                        imgElement.src = imgUrl;
-                        imgElement.className = 'ai-img';
-                        wrapper.querySelector('.ai-bubble').appendChild(imgElement);
-                    }
+                if (imageTag && imageTag[1]) {
+                    const imgQuery = encodeURIComponent(imageTag[1].trim());
+                    const imgElement = document.createElement('img');
+                    imgElement.src = `https://source.unsplash.com/featured/?${imgQuery}`;
+                    imgElement.className = 'ai-img';
+                    imgElement.onerror = () => imgElement.remove();
+                    wrapper.querySelector('.ai-bubble').appendChild(imgElement);
                 }
             }
             
@@ -117,10 +107,10 @@
                     body: JSON.stringify({ 
                         model: MODEL_ID, 
                         messages: [
-                            { role: "system", content: "Ты помощник Beta AI. Если пользователь спрашивает про конкретный объект, металл, животное или место, в самом конце своего ответа обязательно добавь тег [IMG: название на английском], чтобы я мог показать фото. Пиши только на русском." },
+                            { role: "system", content: "Ты — Beta AI. Твоя задача помогать пользователю. В конце ответа, если ты упомянул какой-то предмет, животное или место, ОБЯЗАТЕЛЬНО добавь тег [IMG: название на английском]. Например: [IMG: cat]. Пиши содержательно на русском языке." },
                             { role: "user", content: text }
                         ], 
-                        temperature: 0.6 
+                        temperature: 0.7 
                     })
                 });
                 const data = await response.json();
