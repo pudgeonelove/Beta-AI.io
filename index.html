@@ -29,7 +29,7 @@
         .input-bar { background: var(--panel); border-radius: 28px; display: flex; align-items: flex-end; padding: 8px 12px; }
         textarea { flex: 1; background: transparent; border: none; color: white; outline: none; resize: none; font-size: 16px; max-height: 150px; padding: 10px; }
         .btn-icon { width: 40px; height: 40px; border-radius: 50%; border: none; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-        .btn-icon svg { fill: var(--text-muted); width: 24px; height: 24px; }
+        .btn-icon svg { fill: #c4c7c5; width: 24px; height: 24px; }
         #sendBtn.active svg { fill: var(--accent); }
         .loading { display: flex; gap: 5px; padding: 10px 0; }
         .dot { width: 6px; height: 6px; background: #666; border-radius: 50%; animation: pulse 1.5s infinite; }
@@ -42,7 +42,7 @@
 <body>
     <header>
         <div class="logo-icon"></div>
-        <h1>Beta AI 0.0.4</h1>
+        <h1>Beta AI 0.1.1</h1>
     </header>
     <div id="chat">
         <div class="ai-wrapper">
@@ -68,7 +68,7 @@
     </div>
     <script>
         const API_KEY = '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';
-        const MODEL_ID = 'llama-3.2-11b-vision-preview';
+        const MODEL_ID = 'llama-3.2-11b-vision-pixtral';
         const chat = document.getElementById('chat');
         const prompt = document.getElementById('prompt');
         const btn = document.getElementById('sendBtn');
@@ -118,7 +118,7 @@
         async function askAI() {
             const text = prompt.value.trim();
             if (!text && !currentBase64) return;
-            const msgText = text || (currentBase64 ? "Что на этом фото?" : "");
+            const msgText = text || "Что на этом фото?";
             const tempImg = currentBase64;
             addMessage('user', msgText, tempImg);
             prompt.value = ''; prompt.style.height = 'auto';
@@ -154,7 +154,7 @@
                 if (response.ok) {
                     addMessage('ai', data.choices[0].message.content);
                 } else {
-                    addMessage('ai', "Ошибка: " + data.error.message);
+                    addMessage('ai', "Ошибка: " + (data.error ? data.error.message : "неизвестно"));
                 }
             } catch (e) {
                 loader.remove();
