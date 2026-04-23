@@ -2,50 +2,129 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Beta AI</title>
     <style>
         :root { 
-            --bg: #131314; --panel: #1e1f20; --text: #e3e3e3; 
-            --accent: #8ab4f8; --user-msg: #2b2c2f; 
+            --bg: #131314; 
+            --panel: #1e1f20; 
+            --text: #e3e3e3; 
+            --accent: #8ab4f8; 
+            --user-msg: #2b2c2f; 
         }
         
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, system-ui, sans-serif; }
-        body { background: var(--bg); color: var(--text); height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        
+        body { 
+            background: var(--bg); 
+            color: var(--text); 
+            height: 100dvh; 
+            display: flex; 
+            flex-direction: column; 
+            overflow: hidden; 
+        }
 
-        header { padding: 15px 20px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #333; }
-        .logo-icon { width: 24px; height: 24px; background: linear-gradient(45deg, #4285f4, #9b72cb); border-radius: 6px; }
+        /* Шапка */
+        header { 
+            padding: 16px 20px; 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+            border-bottom: 1px solid #333;
+            flex-shrink: 0;
+        }
+        .logo-icon { 
+            width: 24px; height: 24px; 
+            background: linear-gradient(45deg, #4285f4, #9b72cb); 
+            border-radius: 6px; 
+        }
         header h1 { font-size: 18px; font-weight: 500; }
 
-        #chat { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 24px; scroll-behavior: smooth; }
+        /* Область чата */
+        #chat { 
+            flex: 1; 
+            overflow-y: auto; 
+            padding: 20px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 24px; 
+            scroll-behavior: smooth;
+        }
         
         .bubble { max-width: 85%; line-height: 1.6; font-size: 16px; }
         .user-wrapper { align-self: flex-end; }
-        .user-bubble { background: var(--user-msg); padding: 12px 18px; border-radius: 20px 24px 4px 24px; }
+        .user-bubble { 
+            background: var(--user-msg); 
+            padding: 12px 18px; 
+            border-radius: 20px 24px 4px 24px; 
+        }
 
         .ai-wrapper { align-self: flex-start; display: flex; gap: 12px; width: 100%; }
-        .ai-avatar { width: 32px; height: 32px; background: #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 14px; }
+        .ai-avatar { 
+            width: 32px; height: 32px; 
+            background: #333; 
+            border-radius: 50%; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            flex-shrink: 0; 
+            font-size: 14px; 
+        }
         .ai-bubble { flex: 1; padding-top: 4px; }
 
-        .input-container { padding: 15px 20px calc(15px + env(safe-area-inset-bottom)); background: var(--bg); }
-        .input-bar { 
-            background: var(--panel); border-radius: 28px; display: flex; align-items: flex-end; 
-            padding: 8px 12px 8px 20px; border: 1px solid transparent;
+        /* Индикатор загрузки */
+        .typing { display: flex; gap: 5px; padding: 10px 0; }
+        .dot { width: 6px; height: 6px; background: #666; border-radius: 50%; animation: pulse 1.5s infinite; }
+        .dot:nth-child(2) { animation-delay: 0.2s; }
+        .dot:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes pulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
+
+        /* Поле ввода */
+        .input-container { 
+            padding: 10px 15px calc(15px + env(safe-area-inset-bottom, 0px)); 
+            background: var(--bg); 
+            flex-shrink: 0;
         }
+        .input-bar { 
+            background: var(--panel); 
+            border-radius: 28px; 
+            display: flex; 
+            align-items: flex-end; 
+            padding: 8px 12px 8px 20px; 
+            border: 1px solid transparent;
+            transition: 0.2s;
+        }
+        .input-bar:focus-within { border-color: #444; }
         
         textarea { 
-            flex: 1; background: transparent; border: none; color: white; 
-            outline: none; resize: none; font-size: 16px; max-height: 150px; padding: 10px 0;
+            flex: 1; 
+            background: transparent; 
+            border: none; 
+            color: white; 
+            outline: none; 
+            resize: none; 
+            font-size: 16px; 
+            max-height: 150px; 
+            padding: 10px 0;
+            line-height: 1.4;
         }
 
         #sendBtn { 
-            width: 40px; height: 40px; border-radius: 50%; border: none; 
-            background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center;
+            width: 40px; 
+            height: 40px; 
+            border-radius: 50%; 
+            border: none; 
+            background: transparent; 
+            cursor: pointer; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            flex-shrink: 0;
         }
         #sendBtn svg { fill: var(--accent); width: 24px; height: 24px; opacity: 0.3; transition: 0.2s; }
         #sendBtn.active svg { opacity: 1; }
 
-        .error { color: #f28b82; background: #3c1e1e; padding: 10px; border-radius: 10px; border: 1px solid #5a2a2a; }
+        .error { color: #f28b82; background: #3c1e1e; padding: 12px; border-radius: 12px; font-size: 14px; }
 
         @media (min-width: 768px) { #chat, .input-container, header { max-width: 800px; margin: 0 auto; width: 100%; } }
     </style>
@@ -54,19 +133,19 @@
 
     <header>
         <div class="logo-icon"></div>
-        <h1>Beta AI 0.0.2</h1>
+        <h1>Beta AI</h1>
     </header>
 
     <div id="chat">
         <div class="ai-wrapper">
             <div class="ai-avatar">✨</div>
-            <div class="ai-bubble">Привет,<b>чем</b>я могу помочь?</div>
+            <div class="ai-bubble">Привет, чем я могу помочь?</div>
         </div>
     </div>
 
     <div class="input-container">
         <div class="input-bar">
-            <textarea id="prompt" rows="1" placeholder="Спроси меня о коде или математике..." autocomplete="off"></textarea>
+            <textarea id="prompt" rows="1" placeholder="Введите сообщение..." autocomplete="off"></textarea>
             <button id="sendBtn">
                 <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg>
             </button>
@@ -74,19 +153,18 @@
     </div>
 
     <script>
-        // ВСТАВЬ СВОЙ КЛЮЧ GROQ СЮДА
+        // Твой актуальный ключ Groq
         const API_KEY = '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'; 
-        
-        // Актуальная модель на текущий момент
-        const MODEL_ID = 'llama-3.3-7b-versatile'; 
+        const MODEL_ID = 'llama-3.3-70b-versatile'; 
 
         const chat = document.getElementById('chat');
         const prompt = document.getElementById('prompt');
         const btn = document.getElementById('sendBtn');
 
+        // Авто-высота текстового поля
         prompt.addEventListener('input', () => {
             prompt.style.height = 'auto';
-            prompt.style.height = prompt.scrollHeight + 'px';
+            prompt.style.height = (prompt.scrollHeight) + 'px';
             btn.classList.toggle('active', prompt.value.trim().length > 0);
         });
 
@@ -94,8 +172,9 @@
             const wrapper = document.createElement('div');
             wrapper.className = role === 'user' ? 'user-wrapper bubble' : 'ai-wrapper bubble';
             
-            const formattedText = text
-                .replace(/</g, "&lt;")
+            // Безопасное форматирование текста
+            const cleanText = text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            const formattedText = cleanText
                 .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
                 .replace(/\n/g, '<br>');
 
@@ -110,6 +189,20 @@
             
             chat.appendChild(wrapper);
             chat.scrollTop = chat.scrollHeight;
+            return wrapper;
+        }
+
+        function showLoading() {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'ai-wrapper bubble loading-indicator';
+            wrapper.innerHTML = `
+                <div class="ai-avatar">✨</div>
+                <div class="ai-bubble">
+                    <div class="typing"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+                </div>`;
+            chat.appendChild(wrapper);
+            chat.scrollTop = chat.scrollHeight;
+            return wrapper;
         }
 
         async function askAI() {
@@ -121,6 +214,8 @@
             prompt.style.height = 'auto';
             btn.classList.remove('active');
 
+            const loader = showLoading();
+
             try {
                 const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
                     method: 'POST',
@@ -131,25 +226,32 @@
                     body: JSON.stringify({
                         model: MODEL_ID,
                         messages: [{ role: "user", content: text }],
-                        temperature: 0.7
+                        temperature: 0.6
                     })
                 });
 
                 const data = await response.json();
+                loader.remove();
 
                 if (response.ok) {
                     addMessage('ai', data.choices[0].message.content);
                 } else {
-                    const err = data.error ? data.error.message : 'Ошибка API';
-                    addMessage('ai', `<b>Проблема:</b> ${err}`, true);
+                    const errorMsg = data.error ? data.error.message : 'Ошибка доступа к API';
+                    addMessage('ai', `<b>Ошибка:</b> ${errorMsg}`, true);
                 }
             } catch (e) {
-                addMessage('ai', '<b>Ошибка сети:</b> Проверь VPN или доступность API.', true);
+                loader.remove();
+                addMessage('ai', '<b>Ошибка сети:</b> Не удалось связаться с сервером. Убедитесь, что VPN включен.', true);
             }
         }
 
         btn.onclick = askAI;
-        prompt.onkeydown = (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); askAI(); } };
+        prompt.onkeydown = (e) => { 
+            if (e.key === 'Enter' && !e.shiftKey) { 
+                e.preventDefault(); 
+                askAI(); 
+            } 
+        };
     </script>
 </body>
 </html>
