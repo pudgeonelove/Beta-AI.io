@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Beta AI</title>
     <style>
-        /* Цвета в стиле Gemini */
         :root { 
             --bg-color: #131314; 
             --chat-bg: #131314; 
@@ -16,35 +15,23 @@
             --accent: #a8c7fa;
         }
         
-        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         
-        /* Идеальная высота для мобильных устройств */
         html, body { 
             height: 100dvh; 
             width: 100%; 
             background: var(--bg-color); 
             color: var(--text-main); 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, sans-serif;
             overflow: hidden; 
             display: flex; 
             flex-direction: column;
         }
 
-        /* Шапка */
-        .header { 
-            padding: 16px 20px; 
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-shrink: 0; 
-            background: var(--bg-color);
-            z-index: 10;
-        }
-
+        .header { padding: 16px 20px; display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
         .header-logo svg { width: 24px; height: 24px; fill: var(--accent); }
-        .header-title { font-size: 18px; font-weight: 500; letter-spacing: 0.5px; color: var(--text-main); }
+        .header-title { font-size: 18px; font-weight: 500; }
 
-        /* Область чата */
         #chat-area { 
             flex: 1; 
             overflow-y: auto; 
@@ -52,28 +39,16 @@
             display: flex; 
             flex-direction: column; 
             gap: 24px; 
-            scroll-behavior: smooth;
         }
 
-        /* Сообщения */
         .msg-wrapper { display: flex; width: 100%; }
         .msg-wrapper.user { justify-content: flex-end; }
         .msg-wrapper.ai { justify-content: flex-start; gap: 12px; }
 
-        .ai-icon {
-            width: 28px; height: 28px;
-            flex-shrink: 0;
-            display: flex; justify-content: center; align-items: center;
-        }
         .ai-icon svg { width: 20px; height: 20px; fill: var(--accent); }
 
-        .msg { 
-            font-size: 16px; 
-            line-height: 1.6; 
-            word-wrap: break-word; 
-        }
+        .msg { font-size: 16px; line-height: 1.6; word-wrap: break-word; }
 
-        /* Стиль пользователя: серый пузырь */
         .user .msg { 
             background: var(--user-bubble); 
             padding: 12px 18px; 
@@ -81,98 +56,47 @@
             max-width: 85%;
         }
 
-        /* Стиль ИИ: просто текст, без пузыря */
-        .ai .msg { 
-            max-width: 90%; 
-            padding-top: 2px;
-            color: var(--text-main);
-        }
+        .ai .msg { max-width: 90%; color: var(--text-main); }
+        .error-text { color: #ff8a8a; font-size: 14px; background: #3a1c1c; padding: 12px; border-radius: 12px; border: 1px solid #5c2828; width: 100%; }
 
-        .error-text { color: #ff8a8a; font-size: 14px; background: #3a1c1c; padding: 10px; border-radius: 12px; border: 1px solid #5c2828;}
-
-        /* Анимация печати */
-        .typing { display: flex; gap: 4px; padding-top: 10px; }
-        .dot { width: 6px; height: 6px; background: var(--text-muted); border-radius: 50%; animation: blink 1.4s infinite both; }
-        .dot:nth-child(2) { animation-delay: 0.2s; }
-        .dot:nth-child(3) { animation-delay: 0.4s; }
-        @keyframes blink { 0%, 80%, 100% { opacity: 0.2; } 40% { opacity: 1; } }
-
-        /* Поле ввода (плавающее внизу) */
-        .input-wrapper { 
-            flex-shrink: 0; 
-            padding: 10px 20px calc(15px + env(safe-area-inset-bottom, 0px)); 
-            background: var(--bg-color);
-        }
-
+        .input-wrapper { padding: 10px 20px calc(15px + env(safe-area-inset-bottom, 0px)); background: var(--bg-color); }
         .input-box {
             display: flex; 
             align-items: flex-end; 
             background: var(--input-bg); 
             border-radius: 32px;
             padding: 8px 12px 8px 20px;
-            min-height: 56px;
         }
 
         textarea { 
-            flex: 1; 
-            background: transparent; 
-            border: none; 
-            color: var(--text-main); 
-            font-size: 16px; /* Защита от авто-зума на iOS */
-            outline: none; 
-            resize: none;
-            max-height: 120px;
-            padding: 10px 0;
-            font-family: inherit;
+            flex: 1; background: transparent; border: none; color: var(--text-main); 
+            font-size: 16px; outline: none; resize: none; max-height: 120px; padding: 10px 0;
         }
-        
-        textarea::placeholder { color: #75777a; }
 
-        .send-btn { 
-            background: transparent; 
-            border: none; 
-            width: 40px; 
-            height: 40px; 
-            border-radius: 50%; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            cursor: pointer; 
-            flex-shrink: 0;
-            transition: background 0.2s;
-        }
-        
-        .send-btn:active { background: #333538; }
-        .send-btn svg { width: 24px; height: 24px; fill: var(--text-muted); transition: fill 0.2s; }
+        .send-btn { background: transparent; border: none; width: 40px; height: 40px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .send-btn svg { width: 24px; height: 24px; fill: var(--text-muted); }
         .send-btn.active svg { fill: var(--accent); }
 
-        /* Ограничение ширины для ПК */
-        @media (min-width: 768px) {
-            .header, #chat-area, .input-wrapper { max-width: 800px; margin: 0 auto; width: 100%; }
-        }
+        @media (min-width: 768px) { .header, #chat-area, .input-wrapper { max-width: 800px; margin: 0 auto; width: 100%; } }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <div class="header-logo">
-            <svg viewBox="0 0 24 24"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"></path></svg>
-        </div>
+        <div class="header-logo"><svg viewBox="0 0 24 24"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"></path></svg></div>
         <div class="header-title">Beta AI</div>
     </div>
 
     <div id="chat-area">
         <div class="msg-wrapper ai">
-            <div class="ai-icon">
-                <svg viewBox="0 0 24 24"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"></path></svg>
-            </div>
-            <div class="msg">Привет. Я обновил интерфейс и добавил умный поиск доступной модели. Напиши мне что-нибудь.</div>
+            <div class="ai-icon"><svg viewBox="0 0 24 24"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"></path></svg></div>
+            <div class="msg">Привет, чем могу помочь?</div>
         </div>
     </div>
 
     <div class="input-wrapper">
         <div class="input-box">
-            <textarea id="userInput" rows="1" placeholder="Введите запрос..." autocomplete="off"></textarea>
+            <textarea id="userInput" rows="1" placeholder="Задай вопрос..." autocomplete="off"></textarea>
             <button id="sendBtn" class="send-btn">
                 <svg viewBox="0 0 24 24"><path d="M3 20v-6l8-2-8-2V4l19 8z"></path></svg>
             </button>
@@ -180,135 +104,68 @@
     </div>
 
     <script>
-        const KEY = 'AIzaSyAbNi8nRsoRdno0wiYTXaFNxsL6ZL-7oYk';
-        
-        // Список моделей: если первая выдает 404, скрипт автоматически пробует следующую
-        const MODELS_TO_TRY = ['gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-1.0-pro'];
+        const KEY = 'AIzaSyACOr0QbBpFyct5FbdZvsZK_SgvVc3mtSI';
         
         const chatArea = document.getElementById('chat-area');
         const input = document.getElementById('userInput');
         const btn = document.getElementById('sendBtn');
 
-        // Иконка для ответов ИИ
-        const aiSvg = `<svg viewBox="0 0 24 24"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"></path></svg>`;
-
-        // Форматирование текста (жирный шрифт и переносы)
-        function formatText(text) {
-            return text.replace(/</g, "&lt;")
-                       .replace(/>/g, "&gt;")
-                       .replace(/\n/g, '<br>')
-                       .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
-                       .replace(/\*(.*?)\*/g, '<i>$1</i>');
-        }
-
-        // Авто-размер поля ввода
         input.addEventListener('input', function() {
             this.style.height = 'auto';
-            this.style.height = (this.scrollHeight < 120 ? this.scrollHeight : 120) + 'px';
-            
-            if (this.value.trim().length > 0) {
-                btn.classList.add('active');
-            } else {
-                btn.classList.remove('active');
-            }
+            this.style.height = this.scrollHeight + 'px';
+            btn.classList.toggle('active', this.value.trim().length > 0);
         });
 
-        // Добавление сообщения в чат
-        function appendMessage(sender, textHTML, isError = false) {
+        function appendMessage(sender, text, isError = false) {
             const wrapper = document.createElement('div');
             wrapper.className = `msg-wrapper ${sender}`;
+            const content = text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>').replace(/\n/g, '<br>');
             
             if (sender === 'ai') {
-                wrapper.innerHTML = `
-                    <div class="ai-icon">${aiSvg}</div>
-                    <div class="msg ${isError ? 'error-text' : ''}">${textHTML}</div>
-                `;
+                wrapper.innerHTML = `<div class="ai-icon"><svg viewBox="0 0 24 24"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"></path></svg></div>
+                                     <div class="msg ${isError ? 'error-text' : ''}">${content}</div>`;
             } else {
-                wrapper.innerHTML = `<div class="msg">${textHTML}</div>`;
+                wrapper.innerHTML = `<div class="msg">${content}</div>`;
             }
-            
             chatArea.appendChild(wrapper);
             chatArea.scrollTop = chatArea.scrollHeight;
-            return wrapper.querySelector('.msg');
-        }
-
-        // Анимация ожидания
-        function showTyping() {
-            const wrapper = document.createElement('div');
-            wrapper.className = `msg-wrapper ai id-typing`;
-            wrapper.innerHTML = `
-                <div class="ai-icon">${aiSvg}</div>
-                <div class="msg"><div class="typing"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>
-            `;
-            chatArea.appendChild(wrapper);
-            chatArea.scrollTop = chatArea.scrollHeight;
-            return wrapper;
         }
 
         async function sendMessage() {
             const text = input.value.trim();
             if (!text) return;
 
-            // Сброс поля ввода
             input.value = '';
             input.style.height = 'auto';
-            btn.classList.remove('active');
-            
-            appendMessage('user', formatText(text));
-            const typingIndicator = showTyping();
+            appendMessage('user', text);
 
-            let success = false;
-            let lastErrorMsg = '';
+            // Пробуем сначала самую быструю модель 1.5 Flash через стабильный v1
+            const API_URL = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${KEY}`;
 
-            // Умный перебор моделей для обхода ошибки 404
-            for (let model of MODELS_TO_TRY) {
-                const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${KEY}`;
-                
-                try {
-                    const response = await fetch(API_URL, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ contents: [{ parts: [{ text: text }] }] })
-                    });
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: text }] }] })
+                });
 
-                    const data = await response.json();
+                const data = await response.json();
 
-                    if (response.ok && data.candidates) {
-                        typingIndicator.remove();
-                        appendMessage('ai', formatText(data.candidates[0].content.parts[0].text));
-                        success = true;
-                        break; // Успешно ответили, выходим из цикла
-                    } else if (response.status === 404) {
-                        lastErrorMsg = `Модель ${model} недоступна.`;
-                        continue; // Пробуем следующую модель
-                    } else {
-                        throw new Error(data.error ? data.error.message : 'Неизвестная ошибка API');
-                    }
-                } catch (e) {
-                    lastErrorMsg = e.message;
-                    // Если это ошибка сети (например, блок провайдера), сразу прерываем
-                    if (e.name === 'TypeError') {
-                        lastErrorMsg = "Сбой сети. В Кыргызстане Google API блокируется без VPN (нужен регион США/Европа).";
-                        break; 
-                    }
+                if (response.ok) {
+                    const reply = data.candidates[0].content.parts[0].text;
+                    appendMessage('ai', reply);
+                } else {
+                    // Если ошибка 400/404/403, выводим подробности
+                    const errMsg = data.error ? data.error.message : 'Неизвестная ошибка';
+                    appendMessage('ai', `<b>Ошибка API:</b> ${errMsg}<br><br><i>Код: ${response.status}</i>`, true);
                 }
-            }
-
-            // Если ни одна модель не сработала
-            if (!success) {
-                typingIndicator.remove();
-                appendMessage('ai', `<b>Ошибка подключения:</b><br>${lastErrorMsg}<br><br><i>Убедитесь, что VPN включен.</i>`, true);
+            } catch (e) {
+                appendMessage('ai', `<b>Ошибка сети:</b> Вероятно, VPN не активен или Google блокирует запрос.`, true);
             }
         }
 
-        btn.addEventListener('click', sendMessage);
-        
-        input.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                sendMessage();
-            }
-        });
+        btn.onclick = sendMessage;
+        input.onkeydown = (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } };
     </script>
 </body>
 </html>
