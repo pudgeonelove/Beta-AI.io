@@ -2,170 +2,153 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Beta AI</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Beta AI 0.0.2</title>
     <style>
         :root { 
-            --bg-color: #131314; 
-            --chat-bg: #131314; 
-            --user-bubble: #282a2c; 
-            --text-main: #e3e3e3; 
-            --text-muted: #c4c7c5;
-            --input-bg: #1e1f20;
-            --accent: #a8c7fa;
+            --bg: #131314; --panel: #1e1f20; --text: #e3e3e3; 
+            --accent: #8ab4f8; --user-msg: #2b2c2f; 
         }
         
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+        body { background: var(--bg); color: var(--text); height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
+
+        /* Header */
+        header { padding: 15px 20px; display: flex; align-items: center; gap: 12px; background: var(--bg); border-bottom: 1px solid #333; }
+        .logo-icon { width: 24px; height: 24px; background: linear-gradient(45deg, #4285f4, #9b72cb); border-radius: 6px; }
+        header h1 { font-size: 18px; font-weight: 500; }
+
+        /* Chat History */
+        #chat { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 20px; }
+        .bubble { max-width: 85%; line-height: 1.6; font-size: 16px; position: relative; }
         
-        html, body { 
-            height: 100dvh; 
-            width: 100%; 
-            background: var(--bg-color); 
-            color: var(--text-main); 
-            font-family: -apple-system, sans-serif;
-            overflow: hidden; 
-            display: flex; 
-            flex-direction: column;
+        .user-wrapper { align-self: flex-end; }
+        .user-bubble { background: var(--user-msg); padding: 12px 18px; border-radius: 20px 20px 4px 20px; }
+
+        .ai-wrapper { align-self: flex-start; display: flex; gap: 12px; width: 100%; }
+        .ai-avatar { width: 30px; height: 30px; background: #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .ai-bubble { padding-top: 4px; flex: 1; }
+
+        /* Input Area */
+        .input-container { padding: 15px 20px calc(15px + env(safe-area-inset-bottom)); background: var(--bg); }
+        .input-bar { 
+            background: var(--panel); border-radius: 28px; display: flex; align-items: center; 
+            padding: 8px 12px 8px 20px; transition: 0.2s; border: 1px solid transparent;
         }
-
-        .header { padding: 16px 20px; display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
-        .header-logo svg { width: 24px; height: 24px; fill: var(--accent); }
-        .header-title { font-size: 18px; font-weight: 500; }
-
-        #chat-area { 
-            flex: 1; 
-            overflow-y: auto; 
-            padding: 10px 20px 20px; 
-            display: flex; 
-            flex-direction: column; 
-            gap: 24px; 
-        }
-
-        .msg-wrapper { display: flex; width: 100%; }
-        .msg-wrapper.user { justify-content: flex-end; }
-        .msg-wrapper.ai { justify-content: flex-start; gap: 12px; }
-
-        .ai-icon svg { width: 20px; height: 20px; fill: var(--accent); }
-
-        .msg { font-size: 16px; line-height: 1.6; word-wrap: break-word; }
-
-        .user .msg { 
-            background: var(--user-bubble); 
-            padding: 12px 18px; 
-            border-radius: 24px 24px 4px 24px; 
-            max-width: 85%;
-        }
-
-        .ai .msg { max-width: 90%; color: var(--text-main); }
-        .error-text { color: #ff8a8a; font-size: 14px; background: #3a1c1c; padding: 12px; border-radius: 12px; border: 1px solid #5c2828; width: 100%; }
-
-        .input-wrapper { padding: 10px 20px calc(15px + env(safe-area-inset-bottom, 0px)); background: var(--bg-color); }
-        .input-box {
-            display: flex; 
-            align-items: flex-end; 
-            background: var(--input-bg); 
-            border-radius: 32px;
-            padding: 8px 12px 8px 20px;
-        }
-
+        .input-bar:focus-within { border-color: #444; background: #252629; }
+        
         textarea { 
-            flex: 1; background: transparent; border: none; color: var(--text-main); 
-            font-size: 16px; outline: none; resize: none; max-height: 120px; padding: 10px 0;
+            flex: 1; background: transparent; border: none; color: white; 
+            outline: none; resize: none; font-size: 16px; max-height: 150px; padding: 8px 0;
         }
 
-        .send-btn { background: transparent; border: none; width: 40px; height: 40px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-        .send-btn svg { width: 24px; height: 24px; fill: var(--text-muted); }
-        .send-btn.active svg { fill: var(--accent); }
+        button { 
+            width: 40px; height: 40px; border-radius: 50%; border: none; 
+            background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center;
+            transition: 0.2s;
+        }
+        button:disabled { opacity: 0.3; }
+        button svg { fill: var(--accent); width: 24px; height: 24px; }
 
-        @media (min-width: 768px) { .header, #chat-area, .input-wrapper { max-width: 800px; margin: 0 auto; width: 100%; } }
+        /* Error Style */
+        .error { color: #f28b82; font-size: 14px; margin-top: 5px; }
+
+        @media (min-width: 768px) { #chat, .input-container, header { max-width: 800px; margin: 0 auto; width: 100%; } }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <div class="header-logo"><svg viewBox="0 0 24 24"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"></path></svg></div>
-        <div class="header-title">Beta AI</div>
-    </div>
+    <header>
+        <div class="logo-icon"></div>
+        <h1>Beta AI</h1>
+    </header>
 
-    <div id="chat-area">
-        <div class="msg-wrapper ai">
-            <div class="ai-icon"><svg viewBox="0 0 24 24"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"></path></svg></div>
-            <div class="msg">Привет, чем могу помочь?</div>
+    <div id="chat">
+        <div class="ai-wrapper">
+            <div class="ai-avatar">✨</div>
+            <div class="ai-bubble">Привет, чем я могу помочь?</div>
         </div>
     </div>
 
-    <div class="input-wrapper">
-        <div class="input-box">
-            <textarea id="userInput" rows="1" placeholder="Задай вопрос..." autocomplete="off"></textarea>
-            <button id="sendBtn" class="send-btn">
-                <svg viewBox="0 0 24 24"><path d="M3 20v-6l8-2-8-2V4l19 8z"></path></svg>
+    <div class="input-container">
+        <div class="input-bar">
+            <textarea id="prompt" rows="1" placeholder="Спроси о чем угодно..." autocomplete="off"></textarea>
+            <button id="sendBtn" disabled>
+                <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg>
             </button>
         </div>
     </div>
 
     <script>
-        const KEY = 'AIzaSyACOr0QbBpFyct5FbdZvsZK_SgvVc3mtSI';
+        // ЗАМЕНИ ЭТОТ КЛЮЧ НА СВОЙ ИЗ GROQ
+        const GROQ_KEY = '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'; 
         
-        const chatArea = document.getElementById('chat-area');
-        const input = document.getElementById('userInput');
+        const chat = document.getElementById('chat');
+        const prompt = document.getElementById('prompt');
         const btn = document.getElementById('sendBtn');
 
-        input.addEventListener('input', function() {
-            this.style.height = 'auto';
-            this.style.height = this.scrollHeight + 'px';
-            btn.classList.toggle('active', this.value.trim().length > 0);
+        // Авто-высота текста
+        prompt.addEventListener('input', () => {
+            prompt.style.height = 'auto';
+            prompt.style.height = prompt.scrollHeight + 'px';
+            btn.disabled = !prompt.value.trim();
         });
 
-        function appendMessage(sender, text, isError = false) {
+        function addMessage(role, text, isError = false) {
             const wrapper = document.createElement('div');
-            wrapper.className = `msg-wrapper ${sender}`;
-            const content = text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>').replace(/\n/g, '<br>');
+            wrapper.className = role === 'user' ? 'user-wrapper bubble' : 'ai-wrapper bubble';
             
-            if (sender === 'ai') {
-                wrapper.innerHTML = `<div class="ai-icon"><svg viewBox="0 0 24 24"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"></path></svg></div>
-                                     <div class="msg ${isError ? 'error-text' : ''}">${content}</div>`;
+            const content = text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>').replace(/\n/g, '<br>');
+
+            if (role === 'user') {
+                wrapper.innerHTML = `<div class="user-bubble">${content}</div>`;
             } else {
-                wrapper.innerHTML = `<div class="msg">${content}</div>`;
+                wrapper.innerHTML = `
+                    <div class="ai-avatar">✨</div>
+                    <div class="ai-bubble ${isError ? 'error' : ''}">${content}</div>
+                `;
             }
-            chatArea.appendChild(wrapper);
-            chatArea.scrollTop = chatArea.scrollHeight;
+            
+            chat.appendChild(wrapper);
+            chat.scrollTop = chat.scrollHeight;
         }
 
-        async function sendMessage() {
-            const text = input.value.trim();
+        async function askAI() {
+            const text = prompt.value.trim();
             if (!text) return;
 
-            input.value = '';
-            input.style.height = 'auto';
-            appendMessage('user', text);
-
-            // Пробуем сначала самую быструю модель 1.5 Flash через стабильный v1
-            const API_URL = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${KEY}`;
+            addMessage('user', text);
+            prompt.value = '';
+            prompt.style.height = 'auto';
+            btn.disabled = true;
 
             try {
-                const response = await fetch(API_URL, {
+                const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ contents: [{ parts: [{ text: text }] }] })
+                    headers: {
+                        'Authorization': `Bearer ${GROQ_KEY}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        model: "llama3-8b-8192", // Очень быстрая и умная модель
+                        messages: [{ role: "user", content: text }]
+                    })
                 });
 
                 const data = await response.json();
 
                 if (response.ok) {
-                    const reply = data.candidates[0].content.parts[0].text;
-                    appendMessage('ai', reply);
+                    addMessage('ai', data.choices[0].message.content);
                 } else {
-                    // Если ошибка 400/404/403, выводим подробности
-                    const errMsg = data.error ? data.error.message : 'Неизвестная ошибка';
-                    appendMessage('ai', `<b>Ошибка API:</b> ${errMsg}<br><br><i>Код: ${response.status}</i>`, true);
+                    addMessage('ai', `Ошибка: ${data.error.message}`, true);
                 }
             } catch (e) {
-                appendMessage('ai', `<b>Ошибка сети:</b> Вероятно, VPN не активен или Google блокирует запрос.`, true);
+                addMessage('ai', 'Ошибка сети. Проверь VPN или ключ API.', true);
             }
         }
 
-        btn.onclick = sendMessage;
-        input.onkeydown = (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } };
+        btn.onclick = askAI;
+        prompt.onkeydown = (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); askAI(); } };
     </script>
 </body>
 </html>
