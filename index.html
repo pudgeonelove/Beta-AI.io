@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Beta AI 0.1.3</title>
+    <title>Beta AI 0.1.5</title>
     <style>
         :root { --bg: #131314; --panel: #1e1f20; --text: #e3e3e3; --accent: #8ab4f8; --user-msg: #2b2c2f; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, sans-serif; }
@@ -18,23 +18,7 @@
         .ai-wrapper { align-self: flex-start; display: flex; gap: 12px; width: 100%; }
         .ai-avatar { width: 32px; height: 32px; background: #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 14px; }
         .ai-bubble { flex: 1; padding-top: 4px; }
-        
-        /* Контейнер для фото с фоном-заглушкой */
-        .img-container { 
-            width: 100%; 
-            max-width: 350px; 
-            min-height: 200px;
-            border-radius: 12px; 
-            margin-top: 12px; 
-            background: #222; 
-            overflow: hidden;
-            border: 1px solid #444;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .ai-img { width: 100%; height: auto; display: block; }
-
+        .ai-img { width: 100%; max-width: 350px; border-radius: 12px; margin-top: 12px; display: block; border: 1px solid #444; }
         .input-container { padding: 10px 15px calc(15px + env(safe-area-inset-bottom, 0px)); background: var(--bg); flex-shrink: 0; }
         .input-bar { background: var(--panel); border-radius: 28px; display: flex; align-items: flex-end; padding: 8px 12px 8px 20px; }
         textarea { flex: 1; background: transparent; border: none; color: white; outline: none; resize: none; font-size: 16px; max-height: 150px; padding: 10px 0; }
@@ -49,11 +33,11 @@
     </style>
 </head>
 <body>
-    <header><div class="logo-icon"></div><h1>Beta AI 0.1.3</h1></header>
+    <header><div class="logo-icon"></div><h1>Beta AI 0.1.5</h1></header>
     <div id="chat">
         <div class="ai-wrapper">
             <div class="ai-avatar">✨</div>
-            <div class="ai-bubble">Готов к работе! Спрашивай о чем угодно, и я постараюсь найти подходящее изображение.</div>
+            <div class="ai-bubble">Привет! Чем я могу помочь?</div>
         </div>
     </div>
     <div class="input-container">
@@ -64,8 +48,8 @@
     </div>
 
     <script>
-        const API_KEY = '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'; 
-        const MODEL_ID = 'llama-3.3-70b-versatile'; 
+        const GROQ_KEY = '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';
+        const PIXABAY_KEY = '45138204-01bf808efcc5c19639557dc55'; // Твой ключ от Pixabay
 
         const chat = document.getElementById('chat');
         const prompt = document.getElementById('prompt');
@@ -77,36 +61,37 @@
             btn.classList.toggle('active', prompt.value.trim().length > 0);
         });
 
-        function addMessage(role, text) {
+        async function getPixabayImage(query) {
+            try {
+                const url = `https://pixabay.com/api/?key=${PIXABAY_KEY}&q=${encodeURIComponent(query)}&image_type=photo&per_page=3&safesearch=true`;
+                const response = await fetch(url);
+                const data = await response.json();
+                return data.hits.length > 0 ? data.hits[0].webformatURL : null;
+            } catch (e) { return null; }
+        }
+
+        async function addMessage(role, text) {
             const wrapper = document.createElement('div');
             wrapper.className = role === 'user' ? 'user-wrapper bubble' : 'ai-wrapper bubble';
             
-            // Ищем тег картинки [IMG: query]
             let imageMatch = text.match(/\[IMG:\s*(.*?)\]/i);
             let cleanText = text.replace(/\[IMG:.*?\]/gi, '').trim();
-            
             const formatted = cleanText.replace(/</g, "&lt;").replace(/\*\*(.*?)\*\*/g, '<b>$1</b>').replace(/\n/g, '<br>');
             
             if (role === 'user') {
                 wrapper.innerHTML = `<div class="user-bubble">${formatted}</div>`;
             } else {
                 wrapper.innerHTML = `<div class="ai-avatar">✨</div><div class="ai-bubble">${formatted}</div>`;
-                
-                if (imageMatch && imageMatch[1]) {
-                    const query = imageMatch[1].trim();
-                    const container = document.createElement('div');
-                    container.className = 'img-container';
-                    // Используем стабильный URL для случайного фото по ключевому слову
-                    container.innerHTML = `<img src="https://images.unsplash.com/photo-1?auto=format&fit=crop&w=600&q=80&sig=${Math.random()}&keywords=${encodeURIComponent(query)}" class="ai-img" alt="${query}" onload="this.style.opacity=1" style="opacity:0; transition: opacity 0.5s;">`;
-                    
-                    // Альтернативный метод, если первый не сработает (прямой доступ через поиск Unsplash)
-                    const img = container.querySelector('img');
-                    img.src = `https://loremflickr.com/600/400/${encodeURIComponent(query)}`;
-                    
-                    wrapper.querySelector('.ai-bubble').appendChild(container);
+                if (imageMatch && imageMatch[1] && PIXABAY_KEY !== 'ВСТАВЬ_СЮДА_ТВОЙ_PIXABAY_KEY') {
+                    const imgUrl = await getPixabayImage(imageMatch[1]);
+                    if (imgUrl) {
+                        const img = document.createElement('img');
+                        img.src = imgUrl;
+                        img.className = 'ai-img';
+                        wrapper.querySelector('.ai-bubble').appendChild(img);
+                    }
                 }
             }
-            
             chat.appendChild(wrapper);
             chat.scrollTop = chat.scrollHeight;
         }
@@ -121,29 +106,23 @@
             loader.className = 'ai-wrapper bubble';
             loader.innerHTML = `<div class="ai-avatar">✨</div><div class="ai-bubble"><div style="display:flex;gap:5px;padding:10px 0"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>`;
             chat.appendChild(loader);
-            chat.scrollTop = chat.scrollHeight;
 
             try {
                 const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
                     method: 'POST',
-                    headers: { 'Authorization': `Bearer ${API_KEY}`, 'Content-Type': 'application/json' },
+                    headers: { 'Authorization': `Bearer ${GROQ_KEY}`, 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
-                        model: MODEL_ID, 
+                        model: 'llama-3.3-70b-versatile', 
                         messages: [
-                            { role: "system", content: "Ты — Beta AI. В конце ответа, если это уместно, добавь [IMG: тематика на английском]. Пиши на русском." },
+                            { role: "system", content: "Ты Beta AI. В конце ответа добавь [IMG: предмет на английском]. Пиши на русском." },
                             { role: "user", content: text }
-                        ], 
-                        temperature: 0.6 
+                        ]
                     })
                 });
                 const data = await response.json();
                 loader.remove();
-                if (response.ok) {
-                    addMessage('ai', data.choices[0].message.content);
-                }
-            } catch (e) {
-                loader.remove();
-            }
+                if (response.ok) addMessage('ai', data.choices[0].message.content);
+            } catch (e) { loader.remove(); }
         }
 
         btn.onclick = askAI;
